@@ -18,6 +18,21 @@
 
 <body>
     {{template "Topbar" .User}}
+
+    {{with active .Tasks}}
+        {{.Name}}
+        {{duration .}}
+        <br/>
+    {{end}}
+
+    <h2>Latest tasks:</h2>
+    {{range finished .Tasks}}
+        {{.Name}}
+        {{duration .}}
+        <br/>
+    {{end}}
+
+
 </body>
 
 </html>

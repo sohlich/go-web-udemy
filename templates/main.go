@@ -6,6 +6,7 @@ import "net/http"
 var (
 	tmpFunc = template.FuncMap{
 		"active":   activeOnly,
+		"finished": finishedOnly,
 		"duration": countDuration,
 	}
 	tpl = template.Must(template.New("").Funcs(tmpFunc).ParseGlob("gohtml/*"))
@@ -42,7 +43,8 @@ func main() {
 			},
 			[]Task{
 				Task{
-					Name: "Working",
+					Name:   "Working",
+					Status: "running",
 				},
 				Task{
 					Name: "Reading",
@@ -64,6 +66,16 @@ func activeOnly(tasks []Task) Task {
 	}
 
 	return Task{}
+}
+
+func finishedOnly(tasks []Task) []Task {
+	filtered := []Task{}
+	for _, val := range tasks {
+		if val.Status != "running" {
+			filtered = append(filtered, val)
+		}
+	}
+	return filtered
 }
 
 func countDuration(t Task) int64 {
