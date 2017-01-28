@@ -6,7 +6,10 @@ import (
 	"io"
 	"log"
 	"net"
+	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 )
 
 func main() {
@@ -20,7 +23,14 @@ func main() {
 		panic("Error occured")
 	}
 	log.Println("Connection going to be handled")
-	handle(conn)
+	go handle(conn)
+
+	signalChan := make(chan os.Signal, 1)
+	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM)
+
+	<-signalChan
+	fmt.Println("Captured %v. Exiting...")
+	os.Exit(0)
 }
 
 func handle(conn net.Conn) {
