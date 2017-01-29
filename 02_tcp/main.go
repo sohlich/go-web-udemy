@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"strings"
 )
 
 func main() {
@@ -25,27 +26,58 @@ func main() {
 	}
 }
 
-var response = `
-<html>\r\n
-<body>\r\n
-<h1>Hello, World!</h1>\r\n
-</body>\r\n
-</html>\r\n`
-
 func handle(conn net.Conn) {
 	defer conn.Close()
-	log.Println("Connection being handled")
 	scanner := bufio.NewScanner(conn)
+	requestLine := ""
 	for scanner.Scan() {
 		fmt.Println(scanner.Text())
+		if requestLine == "" {
+			requestLine = scanner.Text()
+		}
 		if scanner.Text() == "" {
+			mux(conn, requestLine)
 			break
 		}
 	}
+}
+
+type Handler func(net.Conn)
+
+func mux(conn net.Conn, head string) {
+	header := strings.Split(head, " ")
+	var handler Handler
+	log.Printf("%s is being handled.\n")
+	switch header[0] {
+	case "GET":
+		handler = handleGet
+	case "POST":
+		handler = handlePost
+	default:
+		return
+	}
+	handler(conn)
+}
+
+var response = `
+<html>\r\n
+<body>\r\n
+<h1>Hello, World from %s method.</h1>\r\n
+</body>\r\n
+</html>\r\n`
+
+func handleGet(conn net.Conn) {
 	fmt.Fprint(conn, "HTTP/1.1 200 OK\n")
 	fmt.Fprintf(conn, "Content-Length: %d\n", len(response))
 	fmt.Fprint(conn, "Content-Type: text/html\n")
 	fmt.Fprint(conn, "\n")
-	fmt.Fprint(conn, response)
+	fmt.Fprint(conn, fmt.Sprintf(response, "GET"))
+}
 
+func handlePost(conn net.Conn) {
+	fmt.Fprint(conn, "HTTP/1.1 200 OK\n")
+	fmt.Fprintf(conn, "Content-Length: %d\n", len(response))
+	fmt.Fprint(conn, "Content-Type: text/html\n")
+	fmt.Fprint(conn, "\n")
+	fmt.Fprint(conn, fmt.Sprintf(response, "POST"))
 }
