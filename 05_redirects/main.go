@@ -62,7 +62,7 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 			tmpl = "Home2"
 		}
 	case http.MethodPost:
-		c.Expires = time.Now().Add(-1 * time.Hour)
+		c.MaxAge = -1 // Remove the cookie
 		http.SetCookie(w, c)
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 	}
