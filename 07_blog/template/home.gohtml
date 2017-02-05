@@ -12,8 +12,8 @@
     </form>
 </body>
 
+{{if .Error}} <span style="color:red;">{{.Error}}</span>{{else}} {{range .Pictures }} <img src="{{.URL}}">{{end}} {{end}}
 
-{{range .Pictures }} {{.Name}} {{end}}
 
 
 </html>
